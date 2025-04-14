@@ -1,0 +1,60 @@
+version: "3.8"
+services:
+  book-db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: bookuser
+      POSTGRES_PASSWORD: bookpass
+      POSTGRES_DB: bookdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - book-db-data:/var/lib/postgresql/data
+
+  user-db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: useruser
+      POSTGRES_PASSWORD: userpass
+      POSTGRES_DB: userdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+
+  book-service:
+    build: ./book-service
+    depends_on:
+      - book-db
+      - user-service
+    environment:
+      HTTP_PORT: 8080
+      DB_HOST: book-db
+      DB_PORT: 5432
+      DB_USER: bookuser
+      DB_PASSWORD: bookpass
+      DB_NAME: bookdb
+      JWT_SECRET: secret
+      USER_SERVICE_URL: http://user-service:8080
+    ports:
+      - "8080:8080"
+
+  user-service:
+    build: ./user-service
+    depends_on:
+      - user-db
+    environment:
+      HTTP_PORT: 8080
+      DB_HOST: user-db
+      DB_PORT: 5432
+      DB_USER: useruser
+      DB_PASSWORD: userpass
+      DB_NAME: userdb
+      JWT_SECRET: secret
+      BOOK_SERVICE_URL: http://book-service:8080
+    ports:
+      - "8081:8080"
+
+volumes:
+  book-db-data:
+  user-db-data:
