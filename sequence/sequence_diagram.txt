@@ -1,0 +1,27 @@
+@startuml
+actor UserA
+participant "Book Service" as BS
+participant "User Service" as US
+database "Book DB" as BDB
+
+UserA -> BS: POST /exchange-requests {requested_book_id, offered_book_id}
+BS -> BDB: Get offered_book
+BDB --> BS: offered_book
+BS -> BDB: Get requested_book
+BDB --> BS: requested_book
+BS -> US: GET /users/{requested_book.owner_id}
+US --> BS: user_B_details
+BS -> BDB: Create exchange_request (pending)
+BDB --> BS: exchange_request_id
+BS --> UserA: 201 Created
+
+...
+
+actor UserB
+UserB -> BS: PUT /exchange-requests/{id} {status: "accepted"}
+BS -> BDB: Get exchange_request
+BDB --> BS: exchange_request
+BS -> BDB: Update book owners (swap)
+BDB --> BS: success
+BS --> UserB: 200 OK
+@enduml

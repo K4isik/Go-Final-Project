@@ -1,0 +1,21 @@
+Table books {
+  id serial [primary key]
+  title varchar(255)
+  author varchar(255)
+  genre varchar(100)
+  owner_id integer
+}
+
+Table exchange_requests {
+  id serial [primary key]
+  requester_id integer
+  requested_book_id integer [ref: > books.id]
+  offered_book_id integer [ref: > books.id]
+  status varchar(50)
+}
+
+Table users {
+  id serial [primary key]
+  username varchar(255) [unique]
+  password varchar(255)
+}
